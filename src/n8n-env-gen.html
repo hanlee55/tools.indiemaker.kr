@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>n8n .env 생성기</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white p-8 rounded shadow-md w-full max-w-lg">
+    <h1 class="text-3xl font-bold mb-6 text-center">n8n .env 생성기</h1>
+    <div id="output" class="mb-6">
+      <h2 class="text-xl font-semibold mb-2">랜덤으로 생성된 .env 파일 내용:</h2>
+      <pre class="bg-gray-100 p-4 rounded text-gray-800 overflow-auto"><code id="envContent"></code></pre>
+    </div>
+    <div class="flex justify-between">
+      <button id="regenerateBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
+        다시생성하기
+      </button>
+      <div>
+        <button id="copyBtn" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded mr-2">
+          복사하기
+        </button>
+        <button id="downloadBtn" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded">
+          저장하기
+        </button>
+      </div>
+    </div>
+    <p class="text-sm text-gray-600 mt-4">
+      다운로드한 파일의 이름을 <strong>.env</strong>로 변경해주세요.
+    </p>
+  </div>
+
+  <script>
+    function generateRandomString(length) {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%^&*_+-,./?';
+      let result = '';
+      for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    }
+
+    function generateEnvContent() {
+      const POSTGRES_USER = 'root';
+      const POSTGRES_PASSWORD = generateRandomString(16);
+      const POSTGRES_DB = 'n8n';
+
+      const N8N_ENCRYPTION_KEY = generateRandomString(32);
+      const N8N_USER_MANAGEMENT_JWT_SECRET = generateRandomString(32);
+
+      const envContent =
+`POSTGRES_USER=${POSTGRES_USER}
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+POSTGRES_DB=${POSTGRES_DB}
+
+N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+N8N_USER_MANAGEMENT_JWT_SECRET=${N8N_USER_MANAGEMENT_JWT_SECRET}
+`;
+      return envContent;
+    }
+
+    function displayEnvContent() {
+      const envContent = generateEnvContent();
+      document.getElementById('envContent').textContent = envContent;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      displayEnvContent();
+    });
+
+    document.getElementById('regenerateBtn').addEventListener('click', () => {
+      displayEnvContent();
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const text = document.getElementById('envContent').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('내용이 복사되었습니다.');
+      }, () => {
+        alert('복사 실패. 브라우저가 이 기능을 지원하지 않습니다.');
+      });
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      const text = document.getElementById('envContent').textContent;
+      const blob = new Blob([text], { type: 'text/plain' });
+      const anchor = document.createElement('a');
+      anchor.download = 'n8n.env'; // 파일명을 'n8n.env'로 설정
+      anchor.href = window.URL.createObjectURL(blob);
+      anchor.style.display = 'none';
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+
+      // 다운로드 후 알림 창 표시
+      alert('[저장 완료] 파일 명을 .env로 변경한 다음, 기존 .env 파일을 덮어써주세요');
+    });
+  </script>
+</body>
+</html>
